@@ -6,77 +6,99 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
 from langchain_openai import ChatOpenAI
-from langchain_community.agent_toolkits.load_tools import load_tools
+from langchain_mcp_adapters.client import MultiServerMCPClient, load_mcp_tools_sync  # <-- synchronous loader
 
-from config import OPENAI_API_KEY
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # -------------------------
-# Define the state
+# MCP server config
+# -------------------------
+MCP_SERVERS = {
+    "jupyter": {
+        "command": "jupyter-mcp-server",
+        "args": [
+            "start",
+            "--transport", "stdio",
+            "--document-url", "http://localhost:8888",
+            "--runtime-url", "http://localhost:8888",
+            "--document-token", "mcp",
+            "--runtime-token", "mcp",
+            "--document-id", "test.ipynb",
+        ],
+        "transport": "stdio",
+    }
+}
+
+# -------------------------
+# Define the LangGraph state
 # -------------------------
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
 # -------------------------
-# Initialize OpenAI LLM
-# -------------------------
-llm = ChatOpenAI(model="o4-mini", api_key=OPENAI_API_KEY)
-
-# -------------------------
-# Load Wikipedia and LLM-Math tools
-# -------------------------
-tools = load_tools(["wikipedia"], llm=llm)
-
-
-# -------------------------
-# Create ToolNode
-# -------------------------
-tool_node = ToolNode(tools)
-
-# -------------------------
 # Node functions
 # -------------------------
-def chatbot(state: State):
+def chatbot_node(state: State):
+    # last message content -> LLM response
     return {"messages": [llm.invoke(state["messages"])]}
 
 def call_tools(state: State):
-    messages = state["messages"]
-    last_message = messages[-1]
+    last_message = state["messages"][-1]
+    # if LLM wants to call a tool, redirect to tool node
     if getattr(last_message, "tool_calls", None):
         return "tools"
     return END
 
 # -------------------------
+# Initialize LLM
+# -------------------------
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)# add     base_url="https://api.metisai.ir/openai/v1" for using metis
+
+# -------------------------
+# Load MCP tools synchronously
+# -------------------------
+def get_tools_sync():
+    client = MultiServerMCPClient(MCP_SERVERS)
+    session = client.session("jupyter")  # synchronous session
+    tools = load_mcp_tools_sync(session)
+    print("Available Jupyter MCP Tools:", [t.name for t in tools])
+    return tools
+
+# -------------------------
 # Build the LangGraph workflow
 # -------------------------
-graph_builder = StateGraph(State)
+def build_graph_sync():
+    tools = get_tools_sync()
+    tool_node = ToolNode(tools)
 
-graph_builder.add_node("chatbot", chatbot)
-graph_builder.add_node("tools", tool_node)
+    graph_builder = StateGraph(State)
+    graph_builder.add_node("chatbot", chatbot_node)
+    graph_builder.add_node("tools", tool_node)
+    graph_builder.add_edge(START, "chatbot")
+    graph_builder.add_edge("tools", "chatbot")
+    graph_builder.add_edge("chatbot", END)
+    graph_builder.add_conditional_edges("chatbot", call_tools)
 
-graph_builder.add_edge(START, "chatbot")
-graph_builder.add_edge("tools", "chatbot")
-graph_builder.add_edge("chatbot", END)
-graph_builder.add_conditional_edges("chatbot", call_tools)
-
-# Compile the graph
-graph = graph_builder.compile()
+    return graph_builder.compile()
 
 # -------------------------
-# Stream interaction
+# Stream user interaction
 # -------------------------
-def stream_graph_updates(user_input: str):
+def stream_graph(graph, user_input: str):
     for event in graph.stream({"messages": [{"role": "user", "content": user_input}]}):
         for value in event.values():
             print("Assistant:", value["messages"][-1].content)
 
 # -------------------------
-# Run loop
+# Main entry
 # -------------------------
-if __name__ == "__main__":
-    while True:
-        user_input = input("User: ")
-        if user_input.lower() in ["quit", "exit", "q"]:
-            print("Goodbye!")
-            break
-        stream_graph_updates(user_input)
+graph = build_graph_sync()
+while True:
+    user_input = input("User: ")
+    if user_input.lower() in ["quit", "exit", "q"]:
+        print("Goodbye!")
+        break
+    stream_graph(graph, user_input)
+

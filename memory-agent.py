@@ -13,7 +13,7 @@ from tools import search_web, get_weather
 tools = [search_web, get_weather]
 tool_node = ToolNode(tools)
 
-llm = ChatOpenAI(model="o4-mini", api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(model="o4-mini", api_key=OPENAI_API_KEY)# add     base_url="https://api.metisai.ir/openai/v1" for using metis
 llm_with_tools = llm.bind_tools(tools)
 
 DB_URI = "localhost:27017"

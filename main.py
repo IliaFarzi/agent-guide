@@ -4,7 +4,7 @@ from langchain_core.messages import AIMessage, ToolMessage, HumanMessage, System
 from config import OPENAI_API_KEY
 from tools import search_web, get_weather
 
-llm = ChatOpenAI(model="o4-mini", api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(model="o4-mini", api_key=OPENAI_API_KEY)# add     base_url="https://api.metisai.ir/openai/v1" for using metis
 
 tools = [search_web, get_weather]
 llm_with_tools = llm.bind_tools(tools)

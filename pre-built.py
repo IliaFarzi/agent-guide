@@ -12,7 +12,7 @@ system_prompt = """Act as a helpful assistant.
     Use the tools only if you don't know the answer.
     """
 
-llm = ChatOpenAI(model="o4-mini", api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(model="o4-mini", api_key=OPENAI_API_KEY)# add     base_url="https://api.metisai.ir/openai/v1" for using metis
 
 tools = [search_web, get_weather]
 llm_with_tools = llm.bind_tools(tools)
@@ -27,6 +27,6 @@ def print_stream(stream):
         else:
             message.pretty_print()
 
-inputs = {"messages": [("user", "What is the weather in Trivandrum now")]}
+inputs = {"messages": [("user", "What is the weather in Theran now")]}
 
 print_stream(agent.stream(inputs, stream_mode="values"))
