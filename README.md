@@ -101,16 +101,16 @@ Understanding how LLMs call tools without a graph structure.
 ### 2. **Pre-built Agent** (`pre-built.py`) ⭐⭐ Easy
 Using LangGraph's ready-made agent patterns.
 
-### 6. **LangGraph basic** (`simple-graph.py`) ⭐⭐ Easy
+### 3. **LangGraph basic** (`simple-graph.py`) ⭐⭐ Easy
 Exploring how LangGraph works
 
-### 3. **Custom Graph Workflow** (`custom-graph.py`) ⭐⭐⭐ Intermediate
+### 4. **Custom Graph Workflow** (`custom-graph.py`) ⭐⭐⭐ Intermediate
 Building your own agent workflow from scratch.
 
-### 4. **Agent with Memory** (`memory-agent.py`) ⭐⭐⭐⭐ Advanced
+### 5. **Agent with Memory** (`memory-agent.py`) ⭐⭐⭐⭐ Advanced
 Adding persistent memory with MongoDB.
 
-### 5. **Agent with Monitoring** (`monitoring-agent.py`) ⭐⭐⭐⭐ Advanced
+### 6. **Agent with Monitoring** (`monitoring-agent.py`) ⭐⭐⭐⭐ Advanced
 Tracking agent performance with LangSmith.
 
 
@@ -273,39 +273,6 @@ python monitoring-agent.py
 - Debug traces
 
 ---
-
-### Example 6: MCP Integration (`simple-graph.py`)
-
-**What you'll learn:** Integrating external tool providers via Model Context Protocol.
-
-**Key Concepts:**
-- MCP (Model Context Protocol)
-- Multi-server MCP clients
-- Dynamic tool loading
-- Jupyter notebook tools
-
-**Prerequisites:**
-- Node.js installed
-- Jupyter MCP server configured
-- Working Jupyter instance
-
-**To run:**
-```bash
-# Terminal 1: Start Jupyter
-jupyter notebook --port=8888
-
-# Terminal 2: Run the agent
-python simple-graph.py
-```
-
-**MCP Architecture:**
-- MCP Servers provide tools
-- Client loads tools dynamically
-- Tools become available to the agent
-- Enables domain-specific capabilities
-
----
-
 ## 🔑 Key Concepts
 
 ### What is an AI Agent?
