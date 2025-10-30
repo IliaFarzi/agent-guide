@@ -27,6 +27,6 @@ def print_stream(stream):
         else:
             message.pretty_print()
 
-inputs = {"messages": [("user", "What is the weather in Theran now")]}
+inputs = {"messages": [("user", "What is the weather in Theran, Iran now")]}
 
 print_stream(agent.stream(inputs, stream_mode="values"))

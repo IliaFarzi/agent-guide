@@ -49,7 +49,7 @@ agent = workflow.compile()
 # display(Image(agent.get_graph().draw_mermaid_png()))
 
 for chunk in agent.stream(
-    {"messages": [("user", "Will it rain in Trivandrum today?")]},
+    {"messages": [("user", "What is highest scoreing game in NBA pre-season 2025?")]},
     stream_mode="values",
 ):
     chunk["messages"][-1].pretty_print()
